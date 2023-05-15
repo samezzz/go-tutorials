@@ -4,22 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"math/rand"
+	"net/http"
 	"strconv"
+
 	"github.com/gorilla/mux"
 )
 
 type Movie struct {
-	ID       string    `json: "id"`
-	Isbn     string    `json: "isbn`
-	Title    string    `json: "title"`
-	Director *Director `json: "director"`
+	ID       string    `json:"id"`
+	Isbn     string    `json:"isbn"`
+	Title    string    `json:"title"`
+	Director *Director `json:"director"`
 }
 
 type Director struct {
-	Firstname string `json: "firstname"`
-	Lastname  string `json: "lastname"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
 }
 
 var movies []Movie
@@ -64,7 +65,7 @@ func createMovie(w http.ResponseWriter, r *http.Request) {
 func updateMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	for index, item :=  range movies {
+	for index, item := range movies {
 		if item.ID == params["id"] {
 			movies = append(movies[:index], movies[index+1:]...)
 			var movie Movie
@@ -72,6 +73,7 @@ func updateMovie(w http.ResponseWriter, r *http.Request) {
 			movie.ID = params["id"]
 			movies = append(movies, movie)
 			json.NewEncoder(w).Encode(movie)
+			return
 		}
 	}
 }
@@ -80,28 +82,28 @@ func main() {
 	r := mux.NewRouter()
 
 	movies = append(movies, Movie{
-		ID: "1",
-		Isbn: "23423",
+		ID:    "1",
+		Isbn:  "23423",
 		Title: "Movie 1",
 		Director: &Director{
 			Firstname: "John",
-			Lastname: "Simon",
+			Lastname:  "Simon",
 		}})
 	movies = append(movies, Movie{
-		ID: "2",
-		Isbn: "23425",
+		ID:    "2",
+		Isbn:  "23425",
 		Title: "Movie 2",
 		Director: &Director{
 			Firstname: "Peter",
-			Lastname: "Mike",
+			Lastname:  "Mike",
 		}})
 
 	r.HandleFunc("/movies", getMovies).Methods("GET")
-	r.HandleFunc("/moves/{id}", getMovie).Methods("GET")
+	r.HandleFunc("/movies/{id}", getMovie).Methods("GET")
 	r.HandleFunc("/movies", createMovie).Methods("POST")
 	r.HandleFunc("/movies/{id}", updateMovie).Methods("PUT")
 	r.HandleFunc("/movies/{id}", deleteMovie).Methods("DELETE")
 
-	fmt.Println("Starting server on port 8080\n")
+	fmt.Println("Starting server on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
