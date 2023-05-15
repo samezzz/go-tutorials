@@ -2,6 +2,9 @@ package api
 
 import (
 	"net/http"
+
+	"github.com/gorilla/mux"
+
 	"github.com/samezzz/go-postgres/storage"
 )
 
@@ -18,9 +21,13 @@ func NewServer(listenAddress string, store storage.Storage) *Server {
 }
 
 func (s *Server) Start() error {
-	http.HandleFunc("/user", s.handleGetUserByID)
-	http.HandleFunc("/foo", s.handleFoo)
-	http.HandleFunc("/bar", s.handleBar)
-	http.HandleFunc("/baz", s.handleBaz)
+	router := mux.NewRouter()
+
+	router.HandleFunc("/todos", s.handleGetAllTodos).Methods("GET")
+	router.HandleFunc("/todo/{id}", s.handleGetTodo).Methods("GET")
+	router.HandleFunc("/todo", s.handleCreateTodo).Methods("POST")
+	router.HandleFunc("/todo/{id}", s.handleUpdateTodo).Methods("PUT")
+	router.HandleFunc("/todo/{id}", s.handleDeleteTodo).Methods("DELETE")
+
 	return http.ListenAndServe(s.listenAddress, nil)
 }
